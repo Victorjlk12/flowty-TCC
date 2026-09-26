@@ -122,11 +122,28 @@ export default function Page() {
     <h1 className="mt-4 text-[56px] font-[900] tracking-[-0.04em] leading-[0.9]">Seu fluxo,<br/>em 3D real.</h1>
     <p className="mt-3 text-[15px] text-zinc-500 max-w-[420px] leading-[1.4]"><b>SEGURE e ARRASTE</b> qualquer card. Ele levanta, segue seu mouse e solta em qualquer coluna.</p>
   </div>
-  <div className="flex items-center gap-3"> 
- <Link href="/agendar" className="h-11 px-6 rounded-full bg-white dark:bg-white/10 border border-zinc-200 dark:border-white/10 text-sm font-semibold flex items-center justify-center hover:bg-zinc-50 dark:hover:bg-white/20 transition-colors">
-  ← Voltar à Agenda
-</Link> 
-  </div>
+  <nav className="flex items-center gap-2 bg-white/80 dark:bg-zinc-900/80 p-1.5 rounded-full border border-zinc-200 dark:border-white/10 backdrop-blur-md shadow-sm">
+  <Link 
+    href="/" 
+    className="px-4 py-2 rounded-full text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+  >
+    Início
+  </Link>
+
+  <Link 
+    href="/flowfy" 
+    className="px-4 py-2 rounded-full text-xs font-bold bg-zinc-900 dark:bg-white text-white dark:text-black shadow-sm"
+  >
+    Kanban
+  </Link>
+
+  <Link 
+    href="/agendar" 
+    className="px-4 py-2 rounded-full text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+  >
+    Agendar
+  </Link>
+</nav>
 </header>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>

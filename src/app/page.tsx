@@ -1,22 +1,56 @@
 "use client"
 import { useState, useEffect } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Calendar } from "@/components/ui/calendar"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useTheme } from "next-themes"
-import { motion, AnimatePresence } from "framer-motion"
-import { Moon, Sun, Sparkles, ArrowUpRight, Plus, Zap, Check, MapPin, Star, TrendingUp, CloudSun, Timer } from "lucide-react"
+import { motion } from "framer-motion"
+import { Moon, Sun, Zap, MapPin, Star, TrendingUp, CloudSun, Timer } from "lucide-react"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
 type Weather = { temp: number; code: number; time: string }
 
 const CLIENTS = [
-  { t:"09:00", n:"Ana Beatriz", s:"Mechas + Corte Longo", v:"R$ 280", img:"https://i.pravatar.cc/150?img=5", tag:"VIP • 12x", status:"pago" },
-  { t:"11:30", n:"Carlos Eduardo", s:"Degradê Navalhado + Barba", v:"R$ 85", img:"https://i.pravatar.cc/150?img=33", tag:"Novo", status:"agora" },
-  { t:"14:00", n:"Juliana Costa", s:"Coloração Global", v:"R$ 450", img:"https://i.pravatar.cc/150?img=26", tag:"Recorrente", status:"pago" },
+  { t: "09:00", n: "Ana Beatriz", s: "Mechas + Corte Longo", v: "R$ 280", img: "https://i.pravatar.cc/150?img=5", tag: "VIP • 12x", status: "pago" },
+  { t: "11:30", n: "Carlos Eduardo", s: "Degradê Navalhado + Barba", v: "R$ 85", img: "https://i.pravatar.cc/150?img=33", tag: "Novo", status: "agora" },
+  { t: "14:00", n: "Juliana Costa", s: "Coloração Global", v: "R$ 450", img: "https://i.pravatar.cc/150?img=26", tag: "Recorrente", status: "pago" },
 ]
+
+// Componente do Menu de Navegação para interligar as 3 páginas
+function Navbar() {
+  const pathname = usePathname()
+
+  const links = [
+    { href: "/", label: "Início" },
+    { href: "/flowfy", label: "Kanban" },
+    { href: "/agendar", label: "Agendamento" },
+  ]
+
+  return (
+    <nav className="flex items-center gap-1.5 bg-white/80 dark:bg-zinc-900/80 p-1 rounded-full border border-zinc-200 dark:border-white/10 backdrop-blur-md shadow-sm">
+      {links.map((link) => {
+        const isActive = pathname === link.href
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
+              isActive
+                ? "bg-zinc-900 dark:bg-white text-white dark:text-black shadow-sm"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+            }`}
+          >
+            {link.label}
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
 
 export default function Page() {
   const [date, setDate] = useState<Date | undefined>(new Date())
@@ -28,17 +62,16 @@ export default function Page() {
 
   useEffect(() => {
     setMounted(true)
-    // API REAL: Horário de São Paulo + Clima de Jundiaí (-23.1857, -46.8978)
     fetch("https://api.open-meteo.com/v1/forecast?latitude=-23.1857&longitude=-46.8978&current=temperature_2m,weather_code&timezone=America/Sao_Paulo")
-     .then(r => r.json())
-     .then(d => setWeather({ temp: Math.round(d.current.temperature_2m), code: d.current.weather_code, time: d.current.time }))
-     .catch(() => setWeather({ temp: 27, code: 0, time: new Date().toISOString() }))
+      .then(r => r.json())
+      .then(d => setWeather({ temp: Math.round(d.current.temperature_2m), code: d.current.weather_code, time: d.current.time }))
+      .catch(() => setWeather({ temp: 27, code: 0, time: new Date().toISOString() }))
 
     const interval = setInterval(() => setTimeNow(new Date()), 1000)
     return () => clearInterval(interval)
   }, [])
 
-  const greeting = timeNow.getHours() < 12? "Bom dia" : timeNow.getHours() < 18? "Boa tarde" : "Boa noite"
+  const greeting = timeNow.getHours() < 12 ? "Bom dia" : timeNow.getHours() < 18 ? "Boa tarde" : "Boa noite"
   const fullDate = format(timeNow, "EEEE, d 'de' MMMM • HH:mm:ss", { locale: ptBR })
 
   return (
@@ -49,29 +82,36 @@ export default function Page() {
       </div>
 
       <div className="max-w-[1600px] mx-auto p-3 md:p-6">
-        {/* HEADER VICTOR */}
+        {/* HEADER VICTOR COM NAVEGAÇÃO ENTRE AS PÁGINAS */}
         <motion.header initial={{y:-10, opacity:0}} animate={{y:0, opacity:1}} className="flex justify-between items-center px-5 py-3 rounded-[24px] bg-white/80 dark:bg-zinc-900/70 backdrop-blur-2xl border shadow-sm sticky top-3 z-50">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-600/20"><Zap className="w-4 h-4 text-white fill-white"/></div>
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-600/20">
+                <Zap className="w-4 h-4 text-white fill-white"/>
+              </div>
               <span className="font-bold">flowfy</span>
               <Badge className="bg-violet-600 text-white border-0 text-[10px]">VICTOR • TCC</Badge>
             </div>
-            <div className="hidden lg:flex items-center gap-2 text-xs text-zinc-500">
+            
+            {/* NAV MENU PARA INTERLIGAR */}
+            <Navbar />
+
+            <div className="hidden lg:flex items-center gap-2 text-xs text-zinc-500 ml-2">
               <MapPin className="w-3 h-3"/>
               <span>Jundiaí, SP</span>
               <span className="w-1 h-1 bg-zinc-300 rounded-full"/>
-              {weather? <span className="flex items-center gap-1"><CloudSun className="w-3 h-3"/>{weather.temp}°C • Agora • {format(new Date(weather.time), "HH:mm", {locale: ptBR})}</span> : <span>Carregando clima real...</span>}
+              {weather ? <span className="flex items-center gap-1"><CloudSun className="w-3 h-3"/>{weather.temp}°C • Agora • {format(new Date(weather.time), "HH:mm", {locale: ptBR})}</span> : <span>Carregando clima real...</span>}
               <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse ml-2"/>
               <span className="text-green-600 font-medium">API Online</span>
             </div>
           </div>
+
           <div className="flex items-center gap-2">
             <div className="hidden md:flex items-center gap-2">
-              <img src="https://i.pravatar.cc/100?img=15" className="w-8 h-8 rounded-full ring-2 ring-violet-600"/>
+              <img src="https://i.pravatar.cc/100?img=15" className="w-8 h-8 rounded-full ring-2 ring-violet-600" alt="Avatar Victor"/>
               <div className="text-left leading-none hidden lg:block"><p className="text-xs font-bold">Victor</p><p className="text-[10px] text-zinc-500">Admin • Dono</p></div>
             </div>
-            {mounted && <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark"? "light" : "dark")} className="rounded-full w-8 h-8"><Sun className="w-4 h-4 dark:hidden"/><Moon className="w-4 h-4 hidden dark:block"/></Button>}
+            {mounted && <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="rounded-full w-8 h-8"><Sun className="w-4 h-4 dark:hidden"/><Moon className="w-4 h-4 hidden dark:block"/></Button>}
           </div>
         </motion.header>
 
@@ -94,7 +134,7 @@ export default function Page() {
               <Card className="col-span-12 md:col-span-7 rounded-[24px] p-[1px] bg-gradient-to-b from-zinc-200 dark:from-zinc-800 to-transparent">
                 <div className="rounded-[23px] bg-white dark:bg-zinc-900 p-5">
                   <div className="flex justify-between">
-                    <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black flex items-center justify-center">R$</div><div><p className="text-xs text-zinc-500">FATURAMENTO DE VICTOR HOJE</p><p className="text-[11px] text-zinc-400">API: {weather?.time? format(new Date(weather.time), "dd/MM/yyyy HH:mm") : "..."}</p></div></div>
+                    <div className="flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-black flex items-center justify-center">R$</div><div><p className="text-xs text-zinc-500">FATURAMENTO DE VICTOR HOJE</p><p className="text-[11px] text-zinc-400">API: {weather?.time ? format(new Date(weather.time), "dd/MM/yyyy HH:mm") : "..."}</p></div></div>
                     <Badge className="bg-green-500/10 text-green-600 rounded-full"><TrendingUp className="w-3 h-3 mr-1"/> +18%</Badge>
                   </div>
                   <div className="text-[42px] font-bold mt-5">R$ 815</div>
@@ -119,7 +159,7 @@ export default function Page() {
               {CLIENTS.map((c,i)=>(
                 <div key={i} onClick={()=>setSelected(i)} className={`flex gap-4 p-4 rounded-[20px] cursor-pointer transition-all ${selected===i?'bg-zinc-900 dark:bg-white text-white dark:text-black shadow-xl':'hover:bg-zinc-50 dark:hover:bg-zinc-800'}`}>
                   <p className="font-mono text-sm font-bold min-w-[40px]">{c.t}</p>
-                  <img src={c.img} className="w-14 h-14 rounded-full border-2 border-white dark:border-zinc-900 object-cover"/>
+                  <img src={c.img} className="w-14 h-14 rounded-full border-2 border-white dark:border-zinc-900 object-cover" alt={c.n}/>
                   <div className="flex-1"><p className="font-semibold">{c.n}</p><p className={`text-xs ${selected===i?'text-white/60 dark:text-black/60':'text-zinc-500'}`}>{c.s} • {c.tag}</p></div>
                   <div className="text-right"><p className="font-bold">{c.v}</p><p className={`text-[10px] px-2 py-0.5 rounded-full ${c.status==='agora'?'bg-amber-500 text-white':'bg-green-500/10 text-green-600'}`}>{c.status}</p></div>
                 </div>
@@ -134,7 +174,7 @@ export default function Page() {
                 <Calendar mode="single" selected={date} onSelect={setDate} className="w-full p-0" />
                 <div className="mt-4 p-3 rounded-xl bg-violet-600/10 border border-violet-600/20 text-xs">
                   <p className="font-semibold text-violet-700 dark:text-violet-300">Hoje é {format(timeNow, "EEEE", {locale: ptBR})}</p>
-                  <p className="text-zinc-500">API: {weather? `${weather.temp}°C em Jundiaí` : "buscando..."} • Hora oficial de Brasília puxada da Open-Meteo</p>
+                  <p className="text-zinc-500">API: {weather ? `${weather.temp}°C em Jundiaí` : "buscando..."} • Hora oficial de Brasília puxada da Open-Meteo</p>
                 </div>
               </Card>
 
